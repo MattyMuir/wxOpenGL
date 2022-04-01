@@ -5,9 +5,10 @@ wxBEGIN_EVENT_TABLE(Canvas, wxPanel)
 	EVT_PAINT(Canvas::OnPaint)
 	EVT_SIZE(Canvas::Resized)
     EVT_IDLE(Canvas::OnIdle)
+    EVT_KEY_DOWN(Canvas::OnKeyDown)
 wxEND_EVENT_TABLE()
 
-Canvas::Canvas(wxWindow* parent) : wxGLCanvas(parent, wxID_ANY)
+Canvas::Canvas(wxWindow* parent, int* attribs) : wxGLCanvas(parent, wxID_ANY, attribs)
 {
 	SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 	mainPtr = (Main*)parent;
@@ -15,8 +16,8 @@ Canvas::Canvas(wxWindow* parent) : wxGLCanvas(parent, wxID_ANY)
     // GL stuff
     context = new wxGLContext(this);
 
-    while (!IsShown()) {};  // Force the Shown
-    wxGLCanvas::SetCurrent(*context);
+    while (!IsShown()) {};
+    SetCurrent(*context);
 
     glLoadIdentity();
     GLenum err = glewInit();
@@ -24,14 +25,13 @@ Canvas::Canvas(wxWindow* parent) : wxGLCanvas(parent, wxID_ANY)
     err = glewInit();
     if (GLEW_OK != err)
     {
-        /* Problem: glewInit failed, something is seriously wrong. */
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+        DebugBreak();
     }
 
     shader = new Shader(Shader::Compile("basic.shader"));
     shader->Bind();
 
-    verts = new float[6]{0.0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f};
+    verts = new float[6]{ 0.0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
     vertCount = 3;
 
     va = new VertexArray;
@@ -42,10 +42,14 @@ Canvas::Canvas(wxWindow* parent) : wxGLCanvas(parent, wxID_ANY)
     va->AddVBuffer(*vb, *vbl);
 
     SetWireframe(false);
+
+    fout.open("C:\\Users\\matty\\Desktop\\wxglout.txt");
 }
 
 Canvas::~Canvas()
 {
+    fout.close();
+
     delete context;
     delete vb;
     delete vbl;
@@ -56,8 +60,8 @@ Canvas::~Canvas()
 
 void Canvas::OnDraw()
 {
-    SetCurrent(*context);
-    glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
+    TIMER(t);
+    glViewport(0, 0, w, h);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -66,6 +70,8 @@ void Canvas::OnDraw()
 
     glFlush();
     SwapBuffers();
+
+    STOP_LOG(t);
 }
 
 void Canvas::OnPaint(wxPaintEvent& evt)
@@ -91,4 +97,21 @@ void Canvas::OnIdle(wxIdleEvent& evt)
             Refresh();
         }
     }
+
+    evt.Skip();
+}
+
+void Canvas::OnKeyDown(wxKeyEvent& evt)
+{
+    if (evt.GetKeyCode() == WXK_RETURN)
+    {
+        // Randomly change all verticies for demo purposes
+        for (int i = 0; i < vertCount * 2; i++)
+            verts[i] = (float)rand() / RAND_MAX * 2 - 1;
+
+        vb->SetData(verts);
+
+        Refresh();
+    }
+    evt.Skip();
 }

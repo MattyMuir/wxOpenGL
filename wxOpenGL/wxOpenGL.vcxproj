@@ -26,6 +26,7 @@
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="VertexArray.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexBufferLayout.h" />
