@@ -13,21 +13,24 @@ Canvas::Canvas(wxWindow* parent, int* attribs) : wxGLCanvas(parent, wxID_ANY, at
 	SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 	mainPtr = (Main*)parent;
 
-    // GL stuff
-    context = new wxGLContext(this);
+    // === GL Initialization ===
+    wxGLContextAttrs ctxAttrs;
+    ctxAttrs.CoreProfile().OGLVersion(4, 6).Robust().ResetIsolation().EndList();
+    context = new wxGLContext(this, nullptr, &ctxAttrs);
 
     while (!IsShown()) {};
     SetCurrent(*context);
 
     glLoadIdentity();
     GLenum err = glewInit();
-
-    err = glewInit();
     if (GLEW_OK != err)
     {
-        DebugBreak();
+        std::cerr << "Glew initialization failed.\n";
+        exit(-1);
     }
+    wglSwapIntervalEXT(0);
 
+    // === Rendering Setup ===
     shader = new Shader(Shader::Compile("basic.shader"));
     shader->Bind();
 
@@ -42,14 +45,10 @@ Canvas::Canvas(wxWindow* parent, int* attribs) : wxGLCanvas(parent, wxID_ANY, at
     va->AddVBuffer(*vb, *vbl);
 
     SetWireframe(false);
-
-    fout.open("C:\\Users\\matty\\Desktop\\wxglout.txt");
 }
 
 Canvas::~Canvas()
 {
-    fout.close();
-
     delete context;
     delete vb;
     delete vbl;
@@ -60,7 +59,7 @@ Canvas::~Canvas()
 
 void Canvas::OnDraw()
 {
-    TIMER(t);
+    TIMER(frame);
     glViewport(0, 0, w, h);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -68,10 +67,9 @@ void Canvas::OnDraw()
 
     glDrawArrays(GL_TRIANGLES, 0, vertCount);
 
-    glFlush();
     SwapBuffers();
-
-    STOP_LOG(t);
+    glFinish();
+    STOP_LOG(frame);
 }
 
 void Canvas::OnPaint(wxPaintEvent& evt)
@@ -83,7 +81,9 @@ void Canvas::OnPaint(wxPaintEvent& evt)
 
 void Canvas::Resized(wxSizeEvent& evt)
 {
+#if DYNAMIC_RESIZE == 0
     if (wxGetMouseState().LeftIsDown()) resizing = true;
+#endif
 	evt.Skip();
 }
 
@@ -97,21 +97,14 @@ void Canvas::OnIdle(wxIdleEvent& evt)
             Refresh();
         }
     }
-
     evt.Skip();
 }
 
 void Canvas::OnKeyDown(wxKeyEvent& evt)
 {
-    if (evt.GetKeyCode() == WXK_RETURN)
+    if (evt.GetKeyCode() == WXK_SPACE)
     {
-        // Randomly change all verticies for demo purposes
-        for (int i = 0; i < vertCount * 2; i++)
-            verts[i] = (float)rand() / RAND_MAX * 2 - 1;
-
-        vb->SetData(verts);
-
-        Refresh();
+        // Keyboard input processing
     }
     evt.Skip();
 }

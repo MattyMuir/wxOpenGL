@@ -1,11 +1,11 @@
 #pragma once
 #include <chrono>
 
-#define TIMING 0
+#define TIMING 1
 
 #if TIMING
 #define TIMER(x) Timer x
-#define STOP_LOG(x) x.Stop(); fout << x.duration * 0.001 << "ms\n"
+#define STOP_LOG(x) x.Stop(); std::cout << #x << " took: " << x.duration * 0.001 << "ms\n"
 #else
 #define TIMER(x)
 #define STOP_LOG(x)

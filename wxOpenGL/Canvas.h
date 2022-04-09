@@ -6,7 +6,6 @@
 #include <wx/glcanvas.h>
 
 #include <string>
-#include <fstream>
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
@@ -14,6 +13,8 @@
 #include "Shader.h"
 
 #include "Timer.h"
+
+#define DYNAMIC_RESIZE 1
 
 class Main;
 
@@ -36,8 +37,6 @@ protected:
 
 	float* verts;
 	int vertCount;
-
-	std::ofstream fout;
 
 	void OnDraw();
 	void OnPaint(wxPaintEvent& evt);
