@@ -65,6 +65,8 @@ void Canvas::OnDraw()
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Drawing code here
+
     glDrawArrays(GL_TRIANGLES, 0, vertCount);
 
     SwapBuffers();

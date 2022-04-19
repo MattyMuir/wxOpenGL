@@ -84,8 +84,8 @@ unsigned int Shader::CompileIndividual(unsigned int shaderType, const std::strin
         char* msg = new char[msgLength];
         glGetShaderInfoLog(id, msgLength, &msgLength, msg);
 
-        std::cout << "Failed to compile " << (shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!\n";
-        std::cout << msg << "\n";
+        std::cerr << "Failed to compile " << (shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!\n";
+        std::cerr << msg << "\n";
 
         delete[] msg;
         return 0;
@@ -115,8 +115,8 @@ unsigned int Shader::LinkShaders(unsigned int vShader, unsigned int fShader)
         char* msg = new char[msgLength];
         glGetProgramInfoLog(id, msgLength, &msgLength, msg);
 
-        std::cout << "Failed to link shaders\n";
-        std::cout << msg << "\n";
+        std::cerr << "Failed to link shaders\n";
+        std::cerr << msg << "\n";
 
         delete[] msg;
         return 0;
